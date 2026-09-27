@@ -1,0 +1,1 @@
+import{t as e}from"./site-motion.CYOkjTvv.js";e();var t=document.querySelector(`.compact-menu`);document.addEventListener(`keydown`,e=>{e.key===`Escape`&&t?.open&&(t.open=!1,t.querySelector(`summary`)?.focus())}),document.addEventListener(`click`,e=>{t?.open&&e.target instanceof Node&&!t.contains(e.target)&&(t.open=!1)});
