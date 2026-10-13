@@ -1,0 +1,1 @@
+var e=new Set,t=0;function n(r){t=0;for(let t of Array.from(e))t(r)||e.delete(t);e.size&&(t=requestAnimationFrame(n))}function r(r){e.add(r),t||=requestAnimationFrame(n)}function i(n){e.delete(n),!e.size&&t&&(cancelAnimationFrame(t),t=0)}export{r as n,i as t};
