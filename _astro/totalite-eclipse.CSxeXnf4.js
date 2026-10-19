@@ -336,20 +336,54 @@ vec4 placeFg(vec2 fc){
   // Ouvertures sous le pont, au-delà du mur : la cité au loin, puis le ciel.
   if (P.y > 0.0 && P.y < FAS0 && (rel < WL || rel > WR)) {
     vec2 Pf = vec2(rel * 0.7 + uPlace.x * 0.3, P.y);
-    float cellF = floor(Pf.x * 6.0);
-    float farTop = 0.11 + 0.07 * hash12(vec2(cellF, 2.0));
-    // Barres lointaines de la cité : étages en bandes, fenêtres qui s’allument, voile de brume vers le haut.
-    if (Pf.y < farTop) {
-      float tone = hash12(vec2(cellF, 5.0));
-      vec3 c = mix(vec3(0.16, 0.2, 0.3), vec3(0.24, 0.26, 0.32), tone) * uDay + nightL * 0.8;
-      vec2 wg = vec2(Pf.x * 150.0, Pf.y * 110.0);
-      if (fract(wg.y) < 0.28) c *= 1.25;
-      else if (fract(wg.x) > 0.35) {
-        c *= 0.62 * (fract(wg.y) > 0.82 ? 0.7 : 1.0);
-        if (hash12(floor(wg) + 9.0) < 0.5 * lampsOn) c += vec3(1.0, 0.7, 0.4) * 0.12;
+    // Les barres des Avanchets au loin (avBar, même relevé Pelichrom que la cité) : deux rangs, le second plus
+    // petit et plus voilé ; le lever de soleil sur la barre de devant que l’on voit dès l’arrivée, à gauche.
+    vec3 skyF = vec3(0.2, 0.32, 0.6) * uDay + nightL;
+    vec3 farL = dayL * 0.85 + nightL;
+    for (int i = 0; i < 2; i++) {
+      float r = float(1 - i);
+      float s = mix(2.6, 3.6, r);
+      float Xd = Pf.x * s + r * 0.37 - 0.3 * (1.0 - r);
+      float Yd = Pf.y * s - 0.012 - r * 0.02;
+      float id = floor(Xd / 0.95);
+      float h = hash12(vec2(id, 41.0 + r));
+      float len = 0.5 + 0.3 * h;
+      float x0 = id * 0.95 + (0.95 - len) * hash12(vec2(id, 43.0 + r));
+      vec4 b = vec4(x0, x0 + len, 0.0, 0.22 + 0.08 * hash12(vec2(id, 45.0 + r)));
+      float seed = id * 3.7 + r * 11.0 + 0.3;
+      if (abs(seed - 14.8) < 0.05) seed += 0.2;
+      if (r < 0.5 && id == -2.0) { seed = 14.8; b = vec4(-1.9, -1.2, 0.0, 0.28); }
+      vec3 alb;
+      float win;
+      vec2 g;
+      if (avBar(b, 0.0, Xd, Yd, 0.0, seed, 0.25 + 0.5 * h, alb, win, g) < 0.5) continue;
+      vec3 c = alb * farL;
+      // Fenêtres qui s’allument quand la lumière tombe.
+      if (win > 0.0 && g.y >= 0.0) {
+        float hw = hash12(floor(g) + seed * 13.1);
+        c += mix(vec3(1.0, 0.6, 0.28), vec3(1.0, 0.82, 0.55), hw) * smoothstep(hw, hw + 0.035, lampsOn * 0.55 + uTot * 0.1) * win * 0.2;
       }
-      c = mix(c, vec3(0.2, 0.32, 0.6) * uDay + nightL, 0.35 * smoothstep(0.0, farTop, Pf.y));
+      // Perspective aérienne : désaturées puis fondues dans le ciel, davantage vers le haut et au second rang.
+      c = mix(c, vec3(dot(c, vec3(0.3, 0.59, 0.11))) * 0.6 + skyF * 0.4, 0.3 + 0.2 * r);
+      c = mix(c, skyF, 0.16 + 0.22 * r + 0.12 * smoothstep(0.0, 0.3, Yd));
       res = vec4(c, 1.0);
+    }
+    // Lisière d’arbres au pied des barres, festonnée, sommets au soleil.
+    float cxF = Pf.x * 70.0;
+    float bumpF = 0.0;
+    for (int j = -1; j <= 1; j++) {
+      float id = floor(cxF) + float(j);
+      float hb = hash12(vec2(id, 51.0));
+      float u = (cxF - id - 0.5) / (0.6 + 0.35 * hb);
+      bumpF = max(bumpF, (0.002 + 0.004 * hb) * sqrt(max(0.0, 1.0 - u * u)));
+    }
+    float treesF = 0.002 + 0.007 * smoothstep(0.4, 0.8, fbm4(vec2(Pf.x * 5.0, 3.0))) + bumpF;
+    if (P.y < treesF + px) {
+      float cov = clamp((treesF - P.y) / px + 0.5, 0.0, 1.0);
+      vec3 c = mix(vec3(0.034, 0.054, 0.03), vec3(0.062, 0.08, 0.036), hash12(vec2(floor(cxF), 53.0)));
+      c *= (0.5 + 0.7 * smoothstep(-0.016, 0.0, P.y - treesF)) * (0.75 + 0.5 * fbm4(vec2(Pf.x * 120.0, P.y * 160.0))) * farL;
+      c = mix(c, skyF, 0.22);
+      res = vec4(mix(res.rgb, c, cov), max(res.a, cov));
     }
     // Sous-face du tablier, en perspective rasante.
     if (P.y > FAS0 - 0.016) res = vec4(vec3(0.05, 0.05, 0.06) * (dayL * 0.4 + nightL), 1.0);
