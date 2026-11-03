@@ -7,6 +7,7 @@ uniform float uScale;  // min(uRes) / 900
 uniform vec2 uPar;     // parallaxe du pointeur (px)
 uniform float uFade;   // ouverture (0 → 1)
 uniform float uMobile; // 1 sur écran étroit
+uniform float uLift;   // px cachés sous les barres du navigateur : la scène remonte d’autant
 uniform float uV[16];
 const float PI = 3.141592653589793;
 const float TAU = 6.283185307179586;
@@ -225,7 +226,7 @@ vec3 toSrgb(vec3 c){
 \n${t.params.map((e,t)=>`#define P_${e} uV[${t}]`).join(`
 `)}\n${t.frag}\n
 void main(){
-  vec3 col = toSrgb(aces(scene(gl_FragCoord.xy) * uFade));
+  vec3 col = toSrgb(aces(scene(gl_FragCoord.xy - vec2(0.0, uLift)) * uFade));
   float n1 = hash12(gl_FragCoord.xy);
   float n2 = hash12(gl_FragCoord.yx + 3.1);
   col += (n1 + n2 - 1.0) / 255.0;

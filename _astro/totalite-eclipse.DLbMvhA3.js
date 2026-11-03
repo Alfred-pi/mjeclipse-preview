@@ -1,4 +1,4 @@
-import{n as e,t}from"./vegetation.DPMDNJGF.js";import{t as n}from"./graffiti.DVLx2wne.js";var r=`
+import{t as e}from"./Totalite.astro_astro_type_script_index_0_lang.CCHKRrxl.js";import{n as t,t as n}from"./vegetation.DPMDNJGF.js";import{t as r}from"./graffiti.DVLx2wne.js";var i=`
 uniform vec4 uPlace;
 vec3 placeAdd;
 
@@ -14,7 +14,7 @@ float fbm4(vec2 p){
   for (int i = 0; i < 4; i++) { s += a * vn(p); p = p * 2.03 + 17.1; a *= 0.5; }
   return s / 0.9375;
 }
-${t}
+${n}
 float sdSeg(vec2 p, vec2 a, vec2 b){
   vec2 pa = p - a, ba = b - a;
   float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
@@ -26,7 +26,7 @@ float sdBox(vec2 p, vec2 b){
 }
 float glowPt(float dPx, float core){ return exp(-dPx * dPx / core) + 0.06 * exp(-dPx / (core * 2.5)); }
 
-${n}
+${r}
 
 // Croissant : disque moins un disque décalé (les cornes du robot, en éclipse).
 float crescent(vec2 p, float r, vec2 off){ return max(length(p) - r, -(length(p - off) - r * 0.92)); }
@@ -47,6 +47,8 @@ vec3 placeAirplane(vec3 col, vec2 fc, float night, float seed, vec2 a, vec2 b, f
     float w = 0.8 + back * 0.012;
     col = mix(col, vec3(0.92, 0.94, 0.97) * 0.4, exp(-lq.y * lq.y / (w * w)) * (1.0 - back / 420.0) * smoothstep(0.35, 0.7, p) * 0.3 * day);
   }
+  // Loin de l’avion (> 48 longueurs), silhouette et feux ne pèsent plus rien : on s’arrête à la traînée.
+  if (abs(lq.x) > 48.0 || abs(lq.y) > 48.0) return col;
   float d = sdSeg(lq, vec2(-7.0, 0.0), vec2(7.0, 0.0)) - 1.1;
   d = min(d, sdSeg(lq, vec2(1.5, 0.0), vec2(-2.5, 7.0)) - 0.7);
   d = min(d, sdSeg(lq, vec2(1.5, 0.0), vec2(-2.5, -7.0)) - 0.7);
@@ -72,6 +74,9 @@ vec3 placeSky(vec3 S, vec2 fc){
   if (uDay > 0.08) {
     float k = fract(uTime / 50.0 + 0.3);
     vec2 c = vec2(mix(-0.15, 1.15, k), 0.66 + 0.04 * sin(k * 9.0)) * uRes;
+    // Boîte englobante du vol (unités de q) : le reste de l’écran saute les six segments par pixel.
+    vec2 bq = (fc - c) / uScale;
+    if (bq.x > -100.0 && bq.x < 12.0 && bq.y > -26.0 && bq.y < 34.0)
     for (int i = 0; i < 6; i++) {
       float fi = float(i);
       vec2 o = vec2(-fi * 16.0 - 8.0 * hash12(vec2(fi, 0.3)), (hash12(vec2(fi, 3.3)) - 0.5) * 36.0 + 3.0 * sin(uTime * 0.7 + fi)) * uScale;
@@ -102,7 +107,7 @@ const vec3 CB2[6] = vec3[6](
   vec3(-0.02, 0.62, 1.0), vec3(0.035, 0.62, 0.0),
   vec3(0.012, 0.0, 0.0), vec3(-0.03, 0.0, 1.0)
 );
-${e}
+${t}
 // Lumière ponctuelle d’une grille de cellules (lampadaires, fenêtres lointaines).
 float cityLights(vec2 g, float density, float seed){
   vec2 id = floor(g);
@@ -707,11 +712,11 @@ vec4 placeFg(vec2 fc){
   placeAdd *= 0.9;
   return res;
 }
-`,i=[[6e-4,23,1.3],[5e-4,37,4.1],[45e-5,59,2.2],[35e-5,83,5],[28e-5,127,.7],[22e-5,173,3.3],[16e-5,251,1.9]],a=1.025,o=.62,s=i.map(([e,t,n])=>`${e.toFixed(5)}*sin(${t.toFixed(1)}*a+${n.toFixed(2)})`).join(`+`),c=`#version 300 es
+`,a=[[6e-4,23,1.3],[5e-4,37,4.1],[45e-5,59,2.2],[35e-5,83,5],[28e-5,127,.7],[22e-5,173,3.3],[16e-5,251,1.9]],o=1.025,s=.62,c=a.map(([e,t,n])=>`${e.toFixed(5)}*sin(${t.toFixed(1)}*a+${n.toFixed(2)})`).join(`+`),l=`#version 300 es
 void main(){
   vec2 p = vec2(float((gl_VertexID << 1) & 2), float(gl_VertexID & 2));
   gl_Position = vec4(p * 2.0 - 1.0, 0.0, 1.0);
-}`,l=`#version 300 es
+}`,u=`#version 300 es
 precision highp float;
 out vec4 outColor;
 
@@ -738,7 +743,7 @@ uniform float uCam;     // zoom du ciel étoilé (suit en partie la taille du So
 const float PI = 3.141592653589793;
 const float TAU = 6.283185307179586;
 const float SUN = 1.0e6;
-const float RM = ${a.toFixed(4)};
+const float RM = ${o.toFixed(4)};
 
 // Protubérances : angle de position, demi-largeur (rad), hauteur (R), forme (0 boucle → 1 nuage)
 const vec4 PROM[3] = vec4[3](
@@ -747,7 +752,7 @@ const vec4 PROM[3] = vec4[3](
   vec4(0.55, 0.035, 0.060, 0.7)
 );
 
-float limb(float a){ return ${s}; }
+float limb(float a){ return ${c}; }
 
 float hash12(vec2 p){
   vec3 p3 = fract(vec3(p.xyx) * 0.1031);
@@ -857,7 +862,7 @@ vec3 toSrgb(vec3 c){
   return mix(1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, 12.92 * c, step(c, vec3(0.0031308)));
 }
 
-${r}
+${i}
 
 void main(){
   vec2 fc = gl_FragCoord.xy;
@@ -879,7 +884,7 @@ void main(){
   float disc = 1.0 - smoothstep(1.0 - px, 1.0 + px, r);
   if (disc > 0.0) {
     float mu = sqrt(max(0.0, 1.0 - r * r));
-    float ld = 1.0 - ${o.toFixed(2)} * (1.0 - mu);
+    float ld = 1.0 - ${s.toFixed(2)} * (1.0 - mu);
     L += SUN * ld * disc * vis * vec3(1.0, 0.90 + 0.06 * mu, 0.78 + 0.12 * mu);
   }
 
@@ -1040,4 +1045,4 @@ void main(){
   float n2 = hash12(fc.yx + 3.1);
   col += (n1 + n2 - 1.0) / 255.0;
   outColor = vec4(col, 1.0);
-}`,u=Math.PI*2,d=1e6,f=1.5,p=26e5,m=Math.atan2(.55,1)*180/Math.PI,h=e=>[Math.cos(e*Math.PI/180),Math.sin(e*Math.PI/180)],g=i.reduce((e,[t])=>e+t,0),_=4096,v=new Float32Array(4097);for(let e=0;e<=_;e++){let t=e/_*u,n=0;for(let[e,r,a]of i)n+=e*Math.sin(r*t+a);v[e]=n}var y=e=>{let t=e/u%1;t<0&&(t+=1);let n=t*_,r=n|0,i=n-r;return v[r]*(1-i)+v[r+1]*i},b=48,x=6,S=28,C=288,w=new Float32Array(C),T=new Float32Array(C);for(let e=0;e<C;e++){let t=(e+.5)/C*u;w[e]=Math.cos(t),T[e]=Math.sin(t)}var E=new Float32Array(S),D=new Float32Array(S),O=0;for(let e=0;e<S;e++){let t=(e+.5)/S,n=1-(1-t)**3,r=3*(1-t)**2/S,i=Math.sqrt(Math.max(0,1-n*n));E[e]=n,D[e]=n*r*(u/C)*(1-o*(1-i)),O+=D[e]*C}var k=b/24;function A(e,t=h(m)){let n=new Float32Array(72),r=t[0]*e,i=t[1]*e,o=a-g-1e-4,s=a+g+1e-4,c=o*o,l=s*s,u=0;for(let e=0;e<C;e++){let t=Math.floor(e/x/k)*3,a=w[e],o=T[e];for(let e=0;e<S;e++){let s=E[e]*a,d=E[e]*o,f=s-r,p=d-i,m=f*f+p*p;if(m<c||m<l&&Math.sqrt(m)<1.025+y(Math.atan2(p,f)))continue;let h=D[e];n[t]+=h,n[t+1]+=h*s,n[t+2]+=h*d,u+=h}}let d=0;for(let e=0;e<24;e++)n[e*3]>n[d*3]&&(d=e);return{W:u/O,groups:n,maxIndex:d}}var j=e=>Math.min(1,Math.max(0,e)),M=e=>1/(32e4*e+5),N=e=>e<=0?0:j((Math.log10(.003)-Math.log10(e))/1.2)*j((Math.log10(e)+7)/1.2),P=e=>j((e/.45)**.3);function F(e,t,n=m){let r=h(n),i=e.getContext(`webgl2`,{alpha:!1,antialias:!1,depth:!1,stencil:!1,premultipliedAlpha:!1,preserveDrawingBuffer:!1,powerPreference:`high-performance`});if(!i)return null;let a=(e,t)=>{let n=i.createShader(e);if(i.shaderSource(n,t),i.compileShader(n),!i.getShaderParameter(n,i.COMPILE_STATUS))throw Error(i.getShaderInfoLog(n)??`shader`);return n},o=i.createProgram();try{if(i.attachShader(o,a(i.VERTEX_SHADER,c)),i.attachShader(o,a(i.FRAGMENT_SHADER,l)),i.linkProgram(o),!i.getProgramParameter(o,i.LINK_STATUS))throw Error(i.getProgramInfoLog(o)??`link`)}catch(e){return console.warn(`[totalité] WebGL indisponible, repli conservé.`,e),null}i.useProgram(o),i.bindVertexArray(i.createVertexArray());let s=e=>i.getUniformLocation(o,e),u={res:s(`uRes`),sun:s(`uSun`),R:s(`uR`),moon:s(`uMoon`),E:s(`uE`),F:s(`uF`),day:s(`uDay`),tot:s(`uTot`),time:s(`uTime`),par:s(`uPar`),bands:s(`uBands`),glow:s(`uGlow`),fade:s(`uFade`),scale:s(`uScale`),corona:s(`uCorona`),emN:s(`uEmN`),em:s(`uEm`),star:s(`uStar`),cam:s(`uCam`),place:s(`uPlace`)},g=new Float32Array(96),_=1,v=1,y=16.7,b=0,x=0,S=NaN,C=A(.006,r),w=Math.log(M(0)),T=!1,E=1,D={key:``};function k(){let t=Math.max(1,e.clientWidth*e.clientHeight);v=Math.min(window.devicePixelRatio||1,f,Math.sqrt(p/t))*_;let n=Math.max(1,Math.round(e.clientWidth*v)),r=Math.max(1,Math.round(e.clientHeight*v));(e.width!==n||e.height!==r)&&(e.width=n,e.height=r),i.viewport(0,0,n,r),D.key=``}function F(t,n,a,o,s,c){let l=e.width,f=e.height,p=Math.min(l,f);t!==S&&(C=A(t,r),S=t);let m=(C.W*a*d)**.4*(1-.45*j((C.W-.05)/.5)),h=0;for(let e=0;e<24;e++){let t=C.groups[e*3];t<=0||(g[h*4]=C.groups[e*3+1]/t,g[h*4+1]=C.groups[e*3+2]/t,g[h*4+2]=C.W>0?2.6*(t/O/C.W)*m:0,g[h*4+3]=0,h++)}let _=C.groups[C.maxIndex*3],y=C.W>0?_/O/C.W:0;i.uniform2f(u.res,l,f),i.uniform2f(u.sun,n.x*v,f-n.y*v),i.uniform1f(u.R,n.r*v),i.uniform2f(u.moon,r[0]*t,r[1]*t),i.uniform1f(u.E,a),i.uniform1f(u.F,C.W),i.uniform1f(u.glow,1+1.6*j((C.W-.002)/.15)),i.uniform1f(u.fade,o),i.uniform1f(u.day,s),i.uniform1f(u.time,c.t),i.uniform2f(u.par,c.px*v,-c.py*v),i.uniform1f(u.bands,N(C.W)),i.uniform1f(u.tot,j(1-s/.14)),i.uniform1f(u.scale,p/900),i.uniform1f(u.cam,(Math.max(1,n.r*v)/(.1*p))**.45),i.uniform1f(u.corona,+(a>4e-4)),i.uniform4f(u.place,n.p??0,n.z??1,(n.g??0)*f,(n.c??0)*f),i.uniform1i(u.emN,h),i.uniform4fv(u.em,g),i.uniform3f(u.star,_>0?C.groups[C.maxIndex*3+1]/_:0,_>0?C.groups[C.maxIndex*3+2]/_:0,C.W>0?1.5*y*y*m:0),i.drawArrays(i.TRIANGLES,0,3)}function I(e){y+=(e*1e3-y)*.1,y>21?b++:b=0,y<12.5?x++:x=0,b>20&&_>.5?(_=Math.max(.5,_*.85),b=0,k()):x>150&&_<1&&(_=Math.min(1,_*1.1),x=0,k())}let L=e=>{e.preventDefault(),t()};return e.addEventListener(`webglcontextlost`,L),{frame(t,n,i,a,o,s,c){I(n);let l=Number.isFinite(o)?(t-o)/1e3:1/0,u=!T&&l<1;i!==S&&(C=A(i,r),S=i);let d=Math.log(M(C.W)),f=P(C.W),p=1;if(s.still)T=!0,w=d,E=f;else if(u){let e=1-(1-j(l/1))**3;w=d+Math.log(1.8)*(1-e),E=f,p=e}else{T=!0;let e=d>w?.45:.16;w+=(d-w)*(1-Math.exp(-n/e)),Math.abs(d-w)<.01&&(w=d),E+=(f-E)*(1-Math.exp(-n/.3)),Math.abs(f-E)<.002&&(E=f)}let m=Math.exp(w),h=`${i}|${m}|${p}|${E}|${a.x}|${a.y}|${a.r}|${a.p}|${a.z}|${a.g}|${a.c}|${e.width}|${s.t}|${s.px}|${s.py}`;return c&&h!==D.key&&(F(i,a,m,p,E,s),D.key=h),u||w!==d||E!==f},resize:k,dispose(){e.removeEventListener(`webglcontextlost`,L)},stats:()=>({quality:_,frameMs:y}),daylight:()=>E}}export{F as createEclipse};
+}`,d=Math.PI*2,f=1e6,p=2,m=26e5,h=Math.atan2(.55,1)*180/Math.PI,g=e=>[Math.cos(e*Math.PI/180),Math.sin(e*Math.PI/180)],_=a.reduce((e,[t])=>e+t,0),v=4096,y=new Float32Array(4097);for(let e=0;e<=v;e++){let t=e/v*d,n=0;for(let[e,r,i]of a)n+=e*Math.sin(r*t+i);y[e]=n}var b=e=>{let t=e/d%1;t<0&&(t+=1);let n=t*v,r=n|0,i=n-r;return y[r]*(1-i)+y[r+1]*i},x=48,S=6,C=28,w=288,T=new Float32Array(w),E=new Float32Array(w);for(let e=0;e<w;e++){let t=(e+.5)/w*d;T[e]=Math.cos(t),E[e]=Math.sin(t)}var D=new Float32Array(C),O=new Float32Array(C),k=0;for(let e=0;e<C;e++){let t=(e+.5)/C,n=1-(1-t)**3,r=3*(1-t)**2/C,i=Math.sqrt(Math.max(0,1-n*n));D[e]=n,O[e]=n*r*(d/w)*(1-s*(1-i)),k+=O[e]*w}var A=x/24;function j(e,t=g(h)){let n=new Float32Array(72),r=t[0]*e,i=t[1]*e,a=o-_-1e-4,s=o+_+1e-4,c=a*a,l=s*s,u=0;for(let e=0;e<w;e++){let t=Math.floor(e/S/A)*3,a=T[e],o=E[e];for(let e=0;e<C;e++){let s=D[e]*a,d=D[e]*o,f=s-r,p=d-i,m=f*f+p*p;if(m<c||m<l&&Math.sqrt(m)<1.025+b(Math.atan2(p,f)))continue;let h=O[e];n[t]+=h,n[t+1]+=h*s,n[t+2]+=h*d,u+=h}}let d=0;for(let e=0;e<24;e++)n[e*3]>n[d*3]&&(d=e);return{W:u/k,groups:n,maxIndex:d}}var M=e=>Math.min(1,Math.max(0,e)),N=e=>1/(32e4*e+5),P=e=>e<=0?0:M((Math.log10(.003)-Math.log10(e))/1.2)*M((Math.log10(e)+7)/1.2),F=e=>M((e/.45)**.3);function I(t,n,r=h){let i=g(r),a=t.getContext(`webgl2`,{alpha:!1,antialias:!1,depth:!1,stencil:!1,premultipliedAlpha:!1,preserveDrawingBuffer:!1,powerPreference:`high-performance`});if(!a)return null;let o=(e,t)=>{let n=a.createShader(e);if(a.shaderSource(n,t),a.compileShader(n),!a.getShaderParameter(n,a.COMPILE_STATUS))throw Error(a.getShaderInfoLog(n)??`shader`);return n},s=a.createProgram();try{if(a.attachShader(s,o(a.VERTEX_SHADER,l)),a.attachShader(s,o(a.FRAGMENT_SHADER,u)),a.linkProgram(s),!a.getProgramParameter(s,a.LINK_STATUS))throw Error(a.getProgramInfoLog(s)??`link`)}catch(e){return console.warn(`[totalité] WebGL indisponible, repli conservé.`,e),null}a.useProgram(s),a.bindVertexArray(a.createVertexArray());let c=e=>a.getUniformLocation(s,e),d={res:c(`uRes`),sun:c(`uSun`),R:c(`uR`),moon:c(`uMoon`),E:c(`uE`),F:c(`uF`),day:c(`uDay`),tot:c(`uTot`),time:c(`uTime`),par:c(`uPar`),bands:c(`uBands`),glow:c(`uGlow`),fade:c(`uFade`),scale:c(`uScale`),corona:c(`uCorona`),emN:c(`uEmN`),em:c(`uEm`),star:c(`uStar`),cam:c(`uCam`),place:c(`uPlace`)},_=new Float32Array(96),v=e(),y=1,b=NaN,x=j(.006,i),S=Math.log(N(0)),C=!1,w=1,T={key:``};function E(){let e=Math.max(1,t.clientWidth*t.clientHeight);y=Math.min(window.devicePixelRatio||1,p,Math.sqrt(m/e))*v.quality();let n=Math.max(1,Math.round(t.clientWidth*y)),r=Math.max(1,Math.round(t.clientHeight*y));(t.width!==n||t.height!==r)&&(t.width=n,t.height=r),a.viewport(0,0,n,r),T.key=``}function D(e,n,r,o,s,c){let l=t.width,u=t.height,p=Math.min(l,u);e!==b&&(x=j(e,i),b=e);let m=(x.W*r*f)**.4*(1-.45*M((x.W-.05)/.5)),h=0;for(let e=0;e<24;e++){let t=x.groups[e*3];t<=0||(_[h*4]=x.groups[e*3+1]/t,_[h*4+1]=x.groups[e*3+2]/t,_[h*4+2]=x.W>0?2.6*(t/k/x.W)*m:0,_[h*4+3]=0,h++)}let g=x.groups[x.maxIndex*3],v=x.W>0?g/k/x.W:0;a.uniform2f(d.res,l,u),a.uniform2f(d.sun,n.x*y,u-n.y*y),a.uniform1f(d.R,n.r*y),a.uniform2f(d.moon,i[0]*e,i[1]*e),a.uniform1f(d.E,r),a.uniform1f(d.F,x.W),a.uniform1f(d.glow,1+1.6*M((x.W-.002)/.15)),a.uniform1f(d.fade,o),a.uniform1f(d.day,s),a.uniform1f(d.time,c.t),a.uniform2f(d.par,c.px*y,-c.py*y),a.uniform1f(d.bands,P(x.W)),a.uniform1f(d.tot,M(1-s/.14)),a.uniform1f(d.scale,p/900),a.uniform1f(d.cam,(Math.max(1,n.r*y)/(.1*p))**.45),a.uniform1f(d.corona,+(r>4e-4)),a.uniform4f(d.place,n.p??0,n.z??1,(n.g??0)*u,(n.c??0)*u),a.uniform1i(d.emN,h),a.uniform4fv(d.em,_),a.uniform3f(d.star,g>0?x.groups[x.maxIndex*3+1]/g:0,g>0?x.groups[x.maxIndex*3+2]/g:0,x.W>0?1.5*v*v*m:0),a.drawArrays(a.TRIANGLES,0,3)}let O=e=>{e.preventDefault(),n()};return t.addEventListener(`webglcontextlost`,O),{frame(e,n,r,a,o,s,c){v.sample(e)&&E();let l=Number.isFinite(o)?(e-o)/1e3:1/0,u=!C&&l<1;r!==b&&(x=j(r,i),b=r);let d=Math.log(N(x.W)),f=F(x.W),p=1;if(s.still)C=!0,S=d,w=f;else if(u){let e=1-(1-M(l/1))**3;S=d+Math.log(1.8)*(1-e),w=f,p=e}else{C=!0;let e=d>S?.45:.16;S+=(d-S)*(1-Math.exp(-n/e)),Math.abs(d-S)<.01&&(S=d),w+=(f-w)*(1-Math.exp(-n/.3)),Math.abs(f-w)<.002&&(w=f)}let m=Math.exp(S),h=`${r}|${m}|${p}|${w}|${a.x}|${a.y}|${a.r}|${a.p}|${a.z}|${a.g}|${a.c}|${t.width}|${s.t}|${s.px}|${s.py}`;return c&&h!==T.key&&(D(r,a,m,p,w,s),T.key=h),u||S!==d||w!==f},resize:E,dispose(){t.removeEventListener(`webglcontextlost`,O)},stats:()=>({quality:v.quality(),frameMs:v.frameMs(),stride:v.stride()}),stride:()=>v.stride(),daylight:()=>w}}export{I as createEclipse};
