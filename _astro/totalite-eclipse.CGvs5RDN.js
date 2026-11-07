@@ -1,4 +1,4 @@
-import{t as e}from"./Totalite.astro_astro_type_script_index_0_lang.Dejzwdv3.js";var t=`
+import{t as e}from"./Totalite.astro_astro_type_script_index_0_lang.DPwL6cgY.js";var t=`
 uniform vec4 uPlace;
 
 float sdSeg(vec2 p, vec2 a, vec2 b){
